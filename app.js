@@ -44,8 +44,9 @@ mongoose.connect(process.env.DB_CONNECTION_URI, {
   useUnifiedTopology: true,
 }).then(()=>{
     console.log('db connected succesfully');
+
 }).catch((err)=>{
-    console.log(err.message);
+    console.log(err);
 });
 
 app.use('/users', userRoutes);
@@ -63,10 +64,10 @@ if(process.env.NODE_ENV === 'production'){
         )
     })
 } else{
-    app.get('/', (req, res) => res.send('Please set to production'))
+    console.log('Please set to production');
+    app.get('/', (req, res) => res.send('Please set to production'));
+    
 }
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));                     

@@ -37,7 +37,7 @@ exports.signup = async (req, res) => {
             email,
             phone,
         });
-
+ 
         await newUser.save();
 
         res.status(201).json({ message: 'User registered successfully!' });
@@ -50,7 +50,6 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         let { email, password } = req.body;
-        // email = email.toLowerCase();
 
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required' });
@@ -158,5 +157,3 @@ exports.getNewsData = async (req, res) => {
         res.status(500).json({ message: 'Error fetching data' });
     }
 };
-
-

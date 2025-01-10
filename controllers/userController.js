@@ -31,7 +31,7 @@ exports.signup = async (req, res) => {
     );
 
     const token = generateToken({ username, password, email, phone, et, yos, reg, ministry, course });
-    const verificationLink = `https://ksucu-mc-backend.onrender.com/users/verify-email?token=${token}`;
+    const verificationLink = `http://localhost:3000/users/verify-email?token=${token}`;
 
     const subject = 'Email Verification';
     const html = `<p>Please verify your email by clicking on the following link, it expires in five minutes: <a href="${verificationLink}">Verify Email</a></p>`;
@@ -136,7 +136,7 @@ exports.verifyEmail = async (req, res) => {
       sameSite: 'strict', // Enhances security by preventing CSRF attacks
     });
 
-    res.redirect(`https://ksucu-mc-frontend.vercel.app/`);
+    res.redirect(`http://localhost:5173/`);
 
   } catch (error) {
     console.error('Error verifying email:', error.message);
@@ -151,33 +151,39 @@ exports.login = async (req, res) => {
     email = email.toLowerCase();
 
     if (!email || !password) {
+      console.log('Password required');
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid username or password' });
+      console.log('user not available');
+      return res.status(401).json({ message: 'User not available, signup' });
     }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      console.log('Invalid User/ password');
       return res.status(401).json({ message: 'Invalid username or password' });
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_USER_SECRET, { expiresIn: '2h' });
 
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_USER_SECRET, { expiresIn: '2h' });
+    
     res.cookie('user_s', token, {
       httpOnly: true,
-      secure: true, // Set to true in production
-      maxAge: 3 * 60 * 60 * 1000, // 3 hours (match session maxAge)
-      sameSite: 'strict', // Enhances security by preventing CSRF attacks
+      secure: false, // Use true in production
+      maxAge: 2 * 60 * 60 * 1000, // Align with token expiration
+      sameSite: 'lax', // Easier testing for development
     });
+    
 
     // Sending a success response
-     res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({ message: 'Login successful' });
     
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ message: error });
   }
-  
 }
 
 exports.forgetPassword = async (req, res) => {
@@ -274,7 +280,6 @@ exports.getUserData = async (req, res) => {
   }
 };
 
-
 exports.updateUserData = async (req, res) => {
   try {
     const userId = req.userId; // Extract user ID from authentication middleware
@@ -309,4 +314,3 @@ exports.logout = async (req, res) => {
     return res.status(500).json({ message: 'An error occurred while processing your request' });
   }
 };
-
